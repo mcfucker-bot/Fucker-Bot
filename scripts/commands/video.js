@@ -1,108 +1,121 @@
-module.exports.config = {
-  name: "video",
-  version: "4.0.0",
-  permission: 0,
-  credits: "EMon-BHai",
-  prefix: true,
-  description: "YouTube থেকে video ডাউনলোড করো (max ~50MB)",
-  category: "media",
-  usages: "video [keyword / youtube url]",
-  cooldowns: 20,
-  dependencies: {
-    "play-dl": ""
+const fs = require('fs-extra');
+const path = require('path');
+const axios = require('axios');
+const nayan = require('nayan-media-downloaders');
+const Youtube = require('youtube-search-api');
+
+async function downloadVideoFromYoutube(link, filePath) {
+  if (!link) throw new Error('Link Not Found');
+  const timestart = Date.now();
+
+  try {
+    const data = await nayan.ytdown(link);
+    const videoUrl = data.data.video;
+
+    return new Promise((resolve, reject) => {
+      axios({
+        method: 'get',
+        url: videoUrl,
+        responseType: 'stream',
+      })
+        .then((response) => {
+          const writer = fs.createWriteStream(filePath);
+          response.data
+            .pipe(writer)
+            .on('finish', () => {
+              resolve({
+                title: data.data.title,
+                timestart,
+              });
+            })
+            .on('error', reject);
+        })
+        .catch(reject);
+    });
+  } catch (error) {
+    throw error;
   }
+}
+
+module.exports.config = {
+  name: 'video',
+  version: '1.0.0',
+  permission: 0,
+  credits: 'Developed by Mohammad Nayan',
+  prefix: true,
+  description: 'Search and download video from YouTube.',
+  usages: 'video <keyword>',
+  category: 'media',
+  cooldowns: 5,
+  aliases: ['v']
 };
 
 module.exports.run = async function ({ api, event, args }) {
-  const play = require("play-dl");
   const { threadID, messageID, senderID } = event;
 
-  if (!args.length) return api.sendMessage(
-    `🎬 VIDEO\n━━━━━━━━━━━━━━━━━━\n📌 ব্যবহার: video [keyword]\n📝 উদাহরণ: video funny cats\n⚠️ Note: Max ~50MB video দেওয়া যাবে\n━━━━━━━━━━━━━━━━━━\n💎 EMon-BHai-BOT`,
-    threadID, messageID
-  );
+  if (!args.length) {
+    return api.sendMessage('» উফফ আবাল কি ভিডিও দেখতে চাস তার ২/১ লাইন তো লেখবি নাকি 🥵\nExample: video <keyword>', threadID, messageID);
+  }
 
+  const keyword = args.join(' ');
   api.setMessageReaction("⏳", messageID, () => {}, true);
 
   try {
-    const query = args.join(" ");
-    let videoUrl;
+    const results = await Youtube.GetListByKeyword(keyword, false, 6);
+    const links = results.items.map((item) => item.id);
+    const titles = results.items.map((item, index) => `${index + 1}. ${item.title} (${item.length.simpleText})`);
 
-    // Check if it's a YouTube URL
-    if (query.includes("youtube.com") || query.includes("youtu.be")) {
-      videoUrl = query;
-    } else {
-      const results = await play.search(query, { limit: 5, source: { youtube: "video" } });
-      // Filter by duration < 10 min to keep file size manageable
-      const filtered = results.filter(v => (v.durationInSec || 0) < 600);
-      if (!filtered.length) throw new Error("No short videos found. Try a more specific keyword.");
+    const message = `🔎 Found ${links.length} results for "${keyword}":\n\n${titles.join('\n')}\n\nReply with a number (1-${links.length}) to download.`;
 
-      const videos = filtered.slice(0, 5);
-      let msg = `🎬 VIDEO SEARCH\n━━━━━━━━━━━━━━━━━━\n\n🔍 "${query}" এর result:\n\n`;
-      videos.forEach((v, i) => {
-        msg += `${i + 1}. ${v.title}\n   ⏱️ ${v.durationRaw || "N/A"}\n\n`;
+    api.setMessageReaction("🎬", messageID, () => {}, true);
+    return api.sendMessage(message, threadID, (err, info) => {
+      global.client.handleReply.push({
+        name: this.config.name,
+        messageID: info.messageID,
+        author: senderID,
+        links
       });
-      msg += `📌 নম্বর দিয়ে reply করো (1-${videos.length})\n💎 EMon-BHai-BOT`;
-
-      api.setMessageReaction("🎬", messageID, () => {}, true);
-      return api.sendMessage({ body: msg }, threadID, (err, info) => {
-        if (err) return;
-        global.client.handleReply.push({
-          type: "reply",
-          name: "video",
-          messageID: info.messageID,
-          author: senderID,
-          videos: videos.map(v => ({ title: v.title, url: v.url }))
-        });
-      }, messageID);
-    }
-
+    }, messageID);
   } catch (err) {
     api.setMessageReaction("❌", messageID, () => {}, true);
-    return api.sendMessage(`❌ Error: ${err.message}`, threadID, messageID);
+    api.sendMessage('❌ সার্চ করতে সমস্যা হয়েছে।', threadID, messageID);
   }
 };
 
 module.exports.handleReply = async function ({ api, event, handleReply }) {
-  const play = require("play-dl");
-  const fs = require("fs-extra");
-  const path = require("path");
-  const { pipeline } = require("stream/promises");
-  const { threadID, messageID, senderID } = event;
-  const { videos } = handleReply;
+  const { threadID, messageID, senderID, body } = event;
+  const { links, author } = handleReply;
 
-  if (senderID !== handleReply.author) return;
-  const index = parseInt(event.body, 10) - 1;
-  if (isNaN(index) || index < 0 || index >= videos.length)
-    return api.sendMessage(`❌ সঠিক নম্বর দাও (1-${videos.length})।`, threadID, messageID);
+  if (senderID !== author) return;
+  const selectedIndex = parseInt(body, 10) - 1;
 
+  if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= links.length) {
+    return api.sendMessage('❌ Invalid selection. Reply with a number between 1 and 6.', threadID, messageID);
+  }
+
+  api.unsendMessage(handleReply.messageID);
   api.setMessageReaction("⏳", messageID, () => {}, true);
-  try { api.unsendMessage(handleReply.messageID); } catch (_) {}
 
-  const video = videos[index];
-  const cacheDir = path.join(__dirname, "../../cache");
+  const selectedLink = `https://www.youtube.com/watch?v=${links[selectedIndex]}`;
+  const cacheDir = path.join(__dirname, 'cache');
+  if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
   const filePath = path.join(cacheDir, `video_${senderID}_${Date.now()}.mp4`);
-  fs.ensureDirSync(cacheDir);
 
   try {
-    const stream = await play.stream(video.url, { quality: 1 });
-    const writer = fs.createWriteStream(filePath);
-    await pipeline(stream.stream, writer);
-
-    const stat = fs.statSync(filePath);
-    if (stat.size < 10000) throw new Error("File too small");
-    if (stat.size > 50 * 1024 * 1024) throw new Error("File too large (>50MB). Shorter video try করো।");
+    const result = await downloadVideoFromYoutube(selectedLink, filePath);
 
     api.setMessageReaction("✅", messageID, () => {}, true);
-    return api.sendMessage(
-      { body: `🎬 ${video.title}\n━━━━━━━━━━━━━━━━━━\n💎 EMon-BHai-BOT`, attachment: fs.createReadStream(filePath) },
-      threadID,
-      () => { try { fs.unlinkSync(filePath); } catch (_) {} },
-      messageID
-    );
-  } catch (err) {
-    try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch (_) {}
+    await api.sendMessage({
+      body: `🎵 Title: ${result.title}\n⏱️ Processing Time: ${Math.floor((Date.now() - result.timestart) / 1000)} seconds.`,
+      attachment: fs.createReadStream(filePath)
+    }, threadID, () => {
+      fs.unlinkSync(filePath);
+    }, messageID);
+
+  } catch (error) {
+    console.error('Error during video download:', error);
     api.setMessageReaction("❌", messageID, () => {}, true);
-    return api.sendMessage(`❌ Video ডাউনলোড error!\n🔧 ${err.message}`, threadID, messageID);
+    api.sendMessage('❌ Failed to download the video. Please try again later.', threadID, messageID);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
 };
