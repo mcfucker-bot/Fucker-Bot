@@ -1,0 +1,33 @@
+# ── Dependencies ─────────────────────────────
+node_modules/
+
+# ── Session / Secrets ─────────────────────────
+Emonstate.json
+*.session
+*.token
+
+# ── Database ──────────────────────────────────
+datasqlite/
+
+# ── Cache files ───────────────────────────────
+scripts/commands/cache/
+scripts/commands/Nayan/
+tmp/
+temp/
+
+# ── Logs ──────────────────────────────────────
+*.log
+logs/
+
+# ── OS & Editor ───────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Replit internal ───────────────────────────
+.local/
+.replit
+replit.nix

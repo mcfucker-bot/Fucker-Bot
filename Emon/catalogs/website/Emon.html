@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMon-BHai-BOT</title>
+  <link rel="icon" href="logo.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a855f7;
+      --accent: #06b6d4;
+      --accent2: #ec4899;
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --bg3: #1a1a28;
+      --card: #16161f;
+      --border: rgba(124,58,237,0.25);
+      --text: #f1f0ff;
+      --muted: rgba(241,240,255,0.5);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,58,237,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(6,182,212,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 60% 40%, rgba(236,72,153,0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Floating particles ── */
+    .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .particle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      animation: float linear infinite;
+      opacity: 0;
+    }
+    @keyframes float {
+      0%   { transform: translateY(110vh) translateX(0); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.3; }
+      100% { transform: translateY(-10vh) translateX(40px); opacity: 0; }
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(10,10,15,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+    .nav-logo {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 12px rgba(124,58,237,0.5);
+    }
+    .nav-name { font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .nav-badge {
+      font-size: 0.65rem; font-weight: 700;
+      background: var(--primary); color: white;
+      padding: 2px 8px; border-radius: 999px;
+      margin-left: 6px; vertical-align: middle;
+    }
+    .nav-status {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.3); } }
+
+    /* ── Main content ── */
+    main {
+      position: relative; z-index: 1;
+      padding-top: 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 5rem 0 3rem;
+    }
+    .hero-logo-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 2rem;
+    }
+    .hero-logo {
+      width: 130px; height: 130px;
+      border-radius: 30px;
+      object-fit: cover;
+      border: 3px solid transparent;
+      background: linear-gradient(var(--card), var(--card)) padding-box,
+                  linear-gradient(135deg, var(--primary), var(--accent), var(--accent2)) border-box;
+      box-shadow:
+        0 0 30px rgba(124,58,237,0.4),
+        0 0 60px rgba(124,58,237,0.15);
+      animation: logo-glow 3s ease-in-out infinite alternate;
+    }
+    @keyframes logo-glow {
+      from { box-shadow: 0 0 30px rgba(124,58,237,0.4), 0 0 60px rgba(124,58,237,0.15); }
+      to   { box-shadow: 0 0 45px rgba(168,85,247,0.6), 0 0 90px rgba(124,58,237,0.25); }
+    }
+    .hero-ring {
+      position: absolute; inset: -12px;
+      border-radius: 40px;
+      border: 2px solid transparent;
+      background: linear-gradient(var(--bg), var(--bg)) padding-box,
+                  linear-gradient(135deg, var(--primary), var(--accent), var(--accent2)) border-box;
+      opacity: 0.4;
+      animation: spin 8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 0%, var(--primary-light) 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+    .hero-prefix {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 0.45rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .hero-prefix span { color: var(--primary-light); font-weight: 700; font-family: monospace; font-size: 1.1rem; }
+
+    .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.7rem 1.6rem;
+      border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer; border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { background: var(--bg3); border-color: var(--primary); }
+
+    /* ── Stats row ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0 3rem;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); border-color: var(--primary); }
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+    .stat-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .stat-value {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+
+    /* ── Section ── */
+    .section { margin-bottom: 3.5rem; }
+    .section-title {
+      font-size: 1.4rem; font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      color: var(--text);
+    }
+    .section-title::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* ── Command cards ── */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .cmd-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      transition: all 0.2s;
+      cursor: default;
+    }
+    .cmd-card:hover { border-color: var(--primary); background: var(--bg3); transform: translateX(3px); }
+    .cmd-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .cmd-info { min-width: 0; }
+    .cmd-name { font-size: 0.85rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cmd-desc { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cmd-badge {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 0.6rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 999px;
+    }
+    .badge-admin { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .badge-fun   { background: rgba(234,179,8,0.2); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+    .badge-free  { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .badge-dl    { background: rgba(6,182,212,0.2); color: #22d3ee; border: 1px solid rgba(6,182,212,0.3); }
+
+    /* ── Owner card ── */
+    .owner-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      display: flex; align-items: center; gap: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .owner-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), transparent 50%);
+      pointer-events: none;
+    }
+    .owner-avatar {
+      width: 80px; height: 80px; border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 20px rgba(124,58,237,0.3);
+      flex-shrink: 0;
+    }
+    .owner-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .owner-role {
+      font-size: 0.8rem; font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 0.75rem;
+    }
+    .owner-links { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .owner-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.78rem; font-weight: 500;
+      padding: 0.35rem 0.85rem;
+      background: var(--bg3); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .owner-link:hover { border-color: var(--primary); background: rgba(124,58,237,0.15); color: var(--primary-light); }
+
+    /* ── Footer ── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center;
+      padding: 2rem 1rem 3rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    footer a { color: var(--primary-light); text-decoration: none; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .owner-card { flex-direction: column; text-align: center; }
+      .owner-links { justify-content: center; }
+      nav { padding: 0.75rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-brand">
+    <img src="logo.png" alt="Logo" class="nav-logo" />
+    <span class="nav-name">EMon-BHai-BOT<span class="nav-badge">v6</span></span>
+  </a>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>Online</span>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-logo-wrap">
+      <div class="hero-ring"></div>
+      <img src="logo.png" alt="EMon-BHai-BOT" class="hero-logo" />
+    </div>
+
+    <h1 class="hero-title">EMon-BHai-BOT</h1>
+    <p class="hero-sub">বাংলাদেশের সেরা Facebook Messenger Bot — ১০০+ command সহ সব কাজ এক জায়গায়।</p>
+
+    <div class="hero-prefix">
+      Prefix: <span>/</span> &nbsp;•&nbsp; Platform: <span>Messenger</span>
+    </div>
+
+    <div class="hero-btns">
+      <a href="https://www.facebook.com/EMon.BHai.FACEBOOK" target="_blank" class="btn btn-primary">
+        📘 Owner FB
+      </a>
+      <a href="https://github.com/sharifvau" target="_blank" class="btn btn-outline">
+        🐙 GitHub
+      </a>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-value" id="stat-commands">117</div>
+      <div class="stat-label">Commands</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div class="stat-value" id="stat-events">9</div>
+      <div class="stat-label">Events</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value">177+</div>
+      <div class="stat-label">Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🔥</div>
+      <div class="stat-value" id="stat-uptime">--</div>
+      <div class="stat-label">Uptime</div>
+    </div>
+  </div>
+
+  <!-- Commands -->
+  <section class="section">
+    <h2 class="section-title">⚡ Popular Commands</h2>
+    <div class="cmd-grid">
+      <div class="cmd-card"><span class="cmd-icon">🤖</span><div class="cmd-info"><div class="cmd-name">/ai</div><div class="cmd-desc">AI চ্যাট করো</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">👤</span><div class="cmd-info"><div class="cmd-name">/stalk</div><div class="cmd-desc">User তথ্য দেখো</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🪪</span><div class="cmd-info"><div class="cmd-name">uid</div><div class="cmd-desc">UID বের করো</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🎵</span><div class="cmd-info"><div class="cmd-name">/music</div><div class="cmd-desc">গান খোঁজো ও নামাও</div></div><span class="cmd-badge badge-dl">DL</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🎬</span><div class="cmd-info"><div class="cmd-name">tik3 video</div><div class="cmd-desc">TikTok ভিডিও ডাউনলোড</div></div><span class="cmd-badge badge-dl">DL</span></div>
+      <div class="cmd-card"><span class="cmd-icon">📥</span><div class="cmd-info"><div class="cmd-name">/fbvideo</div><div class="cmd-desc">FB ভিডিও ডাউনলোড</div></div><span class="cmd-badge badge-dl">DL</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🔊</span><div class="cmd-info"><div class="cmd-name">speech</div><div class="cmd-desc">Text to Voice</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🌐</span><div class="cmd-info"><div class="cmd-name">translate</div><div class="cmd-desc">যেকোনো ভাষায় অনুবাদ</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🖼️</span><div class="cmd-info"><div class="cmd-name">/pp</div><div class="cmd-desc">Profile Picture ডাউনলোড</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">📱</span><div class="cmd-info"><div class="cmd-name">/qr</div><div class="cmd-desc">QR Code তৈরি</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🌤️</span><div class="cmd-info"><div class="cmd-name">weather</div><div class="cmd-desc">আবহাওয়া দেখো</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">📚</span><div class="cmd-info"><div class="cmd-name">wiki</div><div class="cmd-desc">Wikipedia খোঁজো</div></div><span class="cmd-badge badge-free">FREE</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🚫</span><div class="cmd-info"><div class="cmd-name">/ban</div><div class="cmd-desc">User ban করো</div></div><span class="cmd-badge badge-admin">ADMIN</span></div>
+      <div class="cmd-card"><span class="cmd-icon">👢</span><div class="cmd-info"><div class="cmd-name">/kick</div><div class="cmd-desc">Group থেকে বের করো</div></div><span class="cmd-badge badge-admin">ADMIN</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🎨</span><div class="cmd-info"><div class="cmd-name">/color</div><div class="cmd-desc">Chat color পরিবর্তন</div></div><span class="cmd-badge badge-admin">ADMIN</span></div>
+      <div class="cmd-card"><span class="cmd-icon">😂</span><div class="cmd-info"><div class="cmd-name">/joke</div><div class="cmd-desc">Random joke</div></div><span class="cmd-badge badge-fun">FUN</span></div>
+      <div class="cmd-card"><span class="cmd-icon">❤️</span><div class="cmd-info"><div class="cmd-name">lovetest</div><div class="cmd-desc">Love % বের করো</div></div><span class="cmd-badge badge-fun">FUN</span></div>
+      <div class="cmd-card"><span class="cmd-icon">🎱</span><div class="cmd-info"><div class="cmd-name">/8ball</div><div class="cmd-desc">Magic 8-ball</div></div><span class="cmd-badge badge-fun">FUN</span></div>
+    </div>
+  </section>
+
+  <!-- Owner -->
+  <section class="section">
+    <h2 class="section-title">👑 Bot Owner</h2>
+    <div class="owner-card">
+      <img
+        src="https://graph.facebook.com/100075290587473/picture?height=200&width=200&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662"
+        alt="Owner"
+        class="owner-avatar"
+        onerror="this.src='logo.png'"
+      />
+      <div>
+        <div class="owner-name">EMON HAWLADAR</div>
+        <div class="owner-role">⚡ Bot Developer &amp; Owner</div>
+        <div class="owner-links">
+          <a href="https://www.facebook.com/EMon.BHai.FACEBOOK" target="_blank" class="owner-link">📘 Facebook</a>
+          <a href="https://github.com/sharifvau" target="_blank" class="owner-link">🐙 GitHub</a>
+          <a href="https://wa.me/+8801309991724" target="_blank" class="owner-link">📞 WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <p>Made with ❤️ by <a href="https://www.facebook.com/EMon.BHai.FACEBOOK" target="_blank">EMON HAWLADAR</a> &nbsp;•&nbsp; EMon-BHai-BOT v6.0.1</p>
+  <p style="margin-top:0.4rem; opacity:0.5;">Powered by EMon-BHai &amp; EMON HAWLADAR</p>
+</footer>
+
+<script>
+  // Particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
+    p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+    p.style.animationDelay = (Math.random() * 20) + 's';
+    p.style.background = ['#7c3aed','#a855f7','#06b6d4','#ec4899'][Math.floor(Math.random()*4)];
+    container.appendChild(p);
+  }
+
+  // Uptime counter
+  const start = Date.now();
+  function updateUptime() {
+    const s = Math.floor((Date.now() - start) / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    document.getElementById('stat-uptime').textContent =
+      h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+  }
+  updateUptime();
+  setInterval(updateUptime, 1000);
+
+  // Count-up animation
+  function countUp(el, target, duration) {
+    const start = 0;
+    const step = target / (duration / 16);
+    let current = start;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { el.textContent = target; clearInterval(timer); }
+      else el.textContent = Math.floor(current);
+    }, 16);
+  }
+  window.addEventListener('load', () => {
+    countUp(document.getElementById('stat-commands'), 117, 1200);
+    countUp(document.getElementById('stat-events'), 9, 800);
+  });
+</script>
+</body>
+</html>

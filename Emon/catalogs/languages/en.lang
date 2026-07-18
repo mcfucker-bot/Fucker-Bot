@@ -1,0 +1,72 @@
+# includes/listen.js
+
+listen.startLoadEnvironment=proceed to load the environment variable.
+listen.loadedEnvironmentThread=loaded thread environment variable successfully 
+listen.loadedEnvironmentUser=loaded user environment variable successfully 
+listen.successLoadEnvironment=loaded environment variable successfully 
+listen.failLoadEnvironment=can't load environment variable, error : %1
+
+# includes/controller/currencies.js
+
+currencies.needObjectOrArray=have to be an array or an object or maybe both
+currencies.needObject=have to be an object
+currencies.needNumber=have to be an number
+
+# includes/controller/threads.js
+
+threads.needObjectOrArray=have to be an Array or an Object or maybe both
+threads.needObject=have to be an Object 
+
+# includes/controller/users.js
+
+users.needObjectOrArray=have to be an Array or an Object or maybe both
+users.needObject=have to be an Object
+
+# includes/handle/handleCommand.js
+
+handleCommand.userBanned=🚫 You are banned from using this bot.
+handleCommand.threadBanned=🚫 This thread is banned from using the bot.
+handleCommand.commandNotExist=❌ Command not found! Did you mean "%1"?\n💡 Use the prefix + help to see all available commands.
+handleCommand.commandThreadBanned=🚫 The command "%1" is disabled in this thread.
+handleCommand.commandUserBanned=🚫 You are not allowed to use the command "%1".
+handleCommand.threadNotAllowNSFW=🔞 NSFW commands are not enabled in this thread.
+handleCommand.cantGetInfoThread=⚠️ Could not get thread info, error: %1
+handleCommand.permissionNotEnough=🔒 You don't have permission to use "%1".
+handleCommand.cantSetMessageReaction=⚠️ Unexpected error at setMessageReaction, error: %1
+handleCommand.executeCommand=\n🕐 Time : %1\n📌 Command : %2\n👤 User ID : %3\n💬 Thread ID : %4\n📝 Args : %5\n⚡ Processing : %6ms
+handleCommand.commandError=⚠️ An error occurred while running "%1".\n📋 %2
+handleCommand.notMatched=ℹ️ This command does not require a prefix.
+handleCommand.noPrefix=⚙️ This command is missing a prefix configuration.
+handleCommand.commandNotFound=❌ The command you used doesn't exist.
+
+# includes/handle/handleCommandEvent.js
+
+handleCommandEvent.moduleError=⚠️ Unexpected error in command "%1".\n📋 %2
+
+# includes/handle/handleCreateDatabase.js
+
+handleCreateDatabase.newThread=Emon - new group detected %1\n
+handleCreateDatabase.newUser=Emon - new user detected %1\n
+
+# includes/handle/handleEvent.js
+
+handleEvent.executeEvent=\n🕐 Time : %1\n📌 Event : %2\n💬 Thread ID : %3\n⚡ Processing : %4ms
+handleEvent.eventError=⚠️ Error in event "%1", error: %12
+
+# includes/handle/handleReaction.js
+
+handleReaction.missingValue=⚠️ Missing value to respond to your request.
+handleReaction.executeError=⚠️ Error while responding to your request, error: %1
+
+# includes/handle/handleReply.js
+
+handleReply.missingValue=⚠️ Missing value to respond to your request.
+handleReply.executeError=⚠️ Error while responding to your request, error: %1
+
+# includes/handle/handleSchedule.js
+
+handleSchedule.exectuteError=⚠️ Error in scheduled module "%1", error: %2
+
+# utils/index.js
+
+utils.throwError=⚠️ Syntax error — use %1help %2 for usage details.
