@@ -18,7 +18,7 @@ module.exports = async ({ api, event }) => {
       afternoon: `goodafternoon everyone, don't forget to eat your lunch.`,
       evening: `goodevening everyone, don't forget to eat.`,
       sleep: `goodnight everyone, time to sleep.`,
-      note: 'greetings every morning, afternoon and evening. the timezone is located in Asia/Manila'
+      note: 'greetings every morning, afternoon and evening. the timezone is located in Asia/Dhaka'
     },
     reminder: {
       status: false,
