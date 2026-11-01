@@ -19,10 +19,11 @@ module.exports.handleEvent = function ({ api, event }) {
   const path = require("path");
 
   // Video location: noprefix/love.mp4
-  const video = path.join(__dirname, "noprefix", "sad.mp4");
+  const video = path.join(__dirname, "noprefix", "love.mp4");
 
   const msg = {
-    body: "তুই আমার জীবনের সেই গল্প — যার শেষটা নয়,\n প্রতিটা অধ্যায়ই রোমাঞ্চকর! 😘🦋"
+    body: "মন থেকে ভালোবাসি বলে_আজ_এত কষ্ট পাইতেছি_যদি
+অন্যদের মত\n টাইম পাস করতাম_তাহলে আমিও\n তাদের মতো_হাসি খুশি_ থাকতাম💔😔"
   };
 
   if (fs.existsSync(video)) {
