@@ -19,7 +19,7 @@ module.exports.handleEvent = function ({ api, event }) {
   const path = require("path");
 
   // Video location: noprefix/love.mp4
-  const video = path.join(__dirname, "noprefix", "love.mp4");
+  const video = path.join(__dirname, "noprefix", "sad.mp4");
 
   const msg = {
     body: "মন থেকে ভালোবাসি বলে_
