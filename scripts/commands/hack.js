@@ -1,10 +1,10 @@
 module.exports.config = {
   name: "hack",
-  version: "1.0.0",
+  version: "1.1.0",
   permission: 0,
-  credits: "Emon",
+  credits: "Emon (updated)",
   prefix: 'awto',
-  description: "Generate a fun 'hacked' image prank",
+  description: "Generate a fun 'hacked' image prank (with fallback)",
   category: "fun",
   usages: "hack [@mention / reply]",
   cooldowns: 5
@@ -25,10 +25,23 @@ module.exports.run = async function({ api, event, args }) {
     const name = userInfo[targetID].name;
     const avatar = `https://graph.facebook.com/${targetID}/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
 
-    const res = await axios.get(
-      `https://api.kenliejugarap.com/hacking/?name=${encodeURIComponent(name)}&url=${encodeURIComponent(avatar)}`,
-      { responseType: "stream" }
-    );
+    // Subukan ang orihinal na API
+    let res;
+    try {
+      res = await axios.get(
+        `https://api.kenliejugarap.com/hacking/?name=${encodeURIComponent(name)}&url=${encodeURIComponent(avatar)}`,
+        { responseType: "stream", timeout: 8000 }
+      );
+    } catch (apiErr) {
+      // Fallback: kung mabigo ang image API, magpadala ng text alert
+      console.warn("Hack image API failed, using fallback text:", apiErr.message);
+      api.setMessageReaction("⚠️", messageID, () => {}, true);
+      return api.sendMessage(
+        `╔══════════════════╗\n   💀 HACKED! (Text Mode) 💀   \n╚══════════════════╝\n\n😈 ${name} — target locked.\n⚠️ (Image API is down, this is a text fallback.)\n\n══════════════════\n💎 EMon-BHai-BOT`,
+        threadID,
+        messageID
+      );
+    }
 
     api.setMessageReaction("✅", messageID, () => {}, true);
     return api.sendMessage({
