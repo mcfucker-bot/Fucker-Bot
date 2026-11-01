@@ -1,10 +1,10 @@
 module.exports.config = {
   name: "❤️",
-  version: "1.0.0",
+  version: "2.0.0",
   prefix: false,
   permission: 0,
   credits: "Emon",
-  description: "❤️ emoji trigger",
+  description: "❤️ emoji trigger with video",
   category: "fun",
   usages: "❤️",
   cooldowns: 5
@@ -12,17 +12,31 @@ module.exports.config = {
 
 module.exports.handleEvent = function ({ api, event }) {
   const body = (event.body || "").trim();
-  if (!body.startsWith("❤️") && !body.startsWith("❤")) return;
 
-  const fs   = require("fs");
+  if (!body.startsWith("❤️")) return;
+
+  const fs = require("fs");
   const path = require("path");
-  const mp3  = path.join(__dirname, "Emon", "love.mp3");
+
+  // Video location: noprefix/love.mp4
+  const video = path.join(__dirname, "noprefix", "love.mp4");
 
   const msg = {
-    body: "ভালোবাসা মানে শুধু কাছে থাকা না,\nমন থেকে মনে পৌঁছে যাওয়া ❤️🥀\n\n— Emon"
+    body: "তুই আমার জীবনের সেই গল্প — যার শেষটা নয়, প্রতিটা অধ্যায়ই রোমাঞ্চকর! 😘🦋"
   };
-  if (fs.existsSync(mp3)) msg.attachment = fs.createReadStream(mp3);
 
-  api.sendMessage(msg, event.threadID, event.messageID);
-  api.setMessageReaction("❤️", event.messageID, () => {}, true);
+  if (fs.existsSync(video)) {
+    msg.attachment = fs.createReadStream(video);
+  }
+
+  api.sendMessage(msg, event.threadID, (err) => {
+    if (err) console.error("Cry video send error:", err);
+  }, event.messageID);
+
+  api.setMessageReaction(
+    "❤️",
+    event.messageID,
+    () => {},
+    true
+  );
 };
