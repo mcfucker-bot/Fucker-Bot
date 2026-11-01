@@ -1,17 +1,16 @@
 module.exports.config = {
   name: "hack",
-  version: "1.1.0",
+  version: "2.0.0",
   permission: 0,
-  credits: "Emon (updated)",
+  credits: "Emon (fixed)",
   prefix: 'awto',
-  description: "Generate a fun 'hacked' image prank (with fallback)",
+  description: "Fun 'hacked' text prank (API-free)",
   category: "fun",
   usages: "hack [@mention / reply]",
   cooldowns: 5
 };
 
 module.exports.run = async function({ api, event, args }) {
-  const axios = require("axios");
   const { threadID, messageID, senderID, mentions } = event;
 
   let targetID = senderID;
@@ -23,34 +22,19 @@ module.exports.run = async function({ api, event, args }) {
   try {
     const userInfo = await api.getUserInfo(targetID);
     const name = userInfo[targetID].name;
-    const avatar = `https://graph.facebook.com/${targetID}/picture?height=720&width=720&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`;
 
-    // Subukan ang orihinal na API
-    let res;
-    try {
-      res = await axios.get(
-        `https://api.kenliejugarap.com/hacking/?name=${encodeURIComponent(name)}&url=${encodeURIComponent(avatar)}`,
-        { responseType: "stream", timeout: 8000 }
-      );
-    } catch (apiErr) {
-      // Fallback: kung mabigo ang image API, magpadala ng text alert
-      console.warn("Hack image API failed, using fallback text:", apiErr.message);
-      api.setMessageReaction("⚠️", messageID, () => {}, true);
-      return api.sendMessage(
-        `╔══════════════════╗\n   💀 HACKED! (Text Mode) 💀   \n╚══════════════════╝\n\n😈 ${name} — target locked.\n⚠️ (Image API is down, this is a text fallback.)\n\n══════════════════\n💎 EMon-BHai-BOT`,
-        threadID,
-        messageID
-      );
-    }
+    // Purong text na "hack" na biro, walang image API na kailangan
+    const fakeIP = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+    const fakePass = Math.random().toString(36).slice(-8);
+
+    const message = `╔══════════════════╗\n   💀 HACKED! 💀   \n╚══════════════════╝\n\n😈 Target: ${name}\n\n🔓 Status: NABUKSAN\n🌐 IP: ${fakeIP}\n🔑 Password: ${fakePass}\n📁 Files: 69 na nakuha\n\n⚠️ (Ito ay puro biro, walang totoong nangyaring hack)\n\n══════════════════\n💎 EMon-BHai-BOT`;
 
     api.setMessageReaction("✅", messageID, () => {}, true);
-    return api.sendMessage({
-      body: `╔══════════════════╗\n   💀 HACKED! 💀   \n╚══════════════════╝\n\n😈 ${name} এর account hack হয়ে গেছে!\n⚠️ (এটা শুধু মজার জন্য)\n\n══════════════════\n💎 EMon-BHai-BOT`,
-      attachment: res.data
-    }, threadID, messageID);
+    return api.sendMessage(message, threadID, messageID);
+
   } catch (err) {
     api.setMessageReaction("❌", messageID, () => {}, true);
     console.error(err);
-    return api.sendMessage(`❌ Hack image তৈরি করতে সমস্যা হয়েছে।`, threadID, messageID);
+    return api.sendMessage(`❌ May naganap na error, subukang muli.`, threadID, messageID);
   }
 };
