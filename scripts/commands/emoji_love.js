@@ -22,7 +22,7 @@ module.exports.handleEvent = function ({ api, event }) {
   const video = path.join(__dirname, "noprefix", "love.mp4");
 
   const msg = {
-    body: "তুই আমার জীবনের সেই গল্প — যার শেষটা নয়,/nপ্রতিটা অধ্যায়ই রোমাঞ্চকর! 😘🦋"
+    body: "তুই আমার জীবনের সেই গল্প — যার শেষটা নয়,প্রতিটা অধ্যায়ই রোমাঞ্চকর! 😘🦋"
   };
 
   if (fs.existsSync(video)) {
